@@ -1,0 +1,23 @@
+newmtl Low_T_shirt1:Base_FRONT_3159
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 0.04 0.04 0.04
+Ns 10.0
+d 1.0
+map_Kd tshirt_diffuse_black_4k.jpg
+
+newmtl Low_T_shirt1:Collar_Stand_FRONT_3153
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 0.04 0.04 0.04
+Ns 10.0
+d 1.0
+map_Kd tshirt_diffuse_black_4k.jpg
+
+newmtl Low_T_shirt1:Patch_FRONT_3165
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 0.02 0.02 0.02
+Ns 10.0
+d 1.0
+map_Kd patch_tag.png
