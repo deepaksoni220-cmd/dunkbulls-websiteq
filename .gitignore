@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 artfacts
+/DUNKBULL_streetwear_products_q.mp4
 
 # debug
 npm-debug.log*
