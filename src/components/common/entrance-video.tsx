@@ -19,7 +19,8 @@ export const EntranceVideo = () => {
   useEffect(() => {
     setMounted(true);
     try {
-      const seen = sessionStorage.getItem(STORAGE_KEY);
+      const forceReplay = window.location.search.includes("intro=1");
+      const seen = !forceReplay && sessionStorage.getItem(STORAGE_KEY);
       if (!seen) {
         setActive(true);
         // Mark preloader as completed so the user experiences a direct transition to the hero
