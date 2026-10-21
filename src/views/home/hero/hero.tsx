@@ -38,15 +38,17 @@ export const Hero = ({ content }: HeroProps) => (
   >
     <div className="max-lg:contents lg:absolute lg:inset-0">
       {/* First viewport screen on mobile: from markers down through 3D model and title to SHOP NOW button */}
-      <div className="flex min-h-[calc(100svh-3.625rem)] w-full flex-col justify-between gap-4 px-5 pt-4 pb-8 sm:gap-6 sm:pb-12 lg:contents">
-        <div className="flex gap-4 lg:contents">
+      <div className="flex min-h-[calc(100svh-3.625rem)] w-full flex-col justify-between px-5 pt-3 pb-6 sm:pb-8 lg:contents">
+        <div className="flex gap-4 shrink-0 lg:contents">
           <HeroMarker align="start" lines={content.markerStart.lines} />
           <HeroMarker align="end" lines={content.markerEnd.lines} />
         </div>
 
-        <HeroStage backdrop={content.backdrop} />
+        <div className="my-auto flex w-full items-center justify-center lg:contents">
+          <HeroStage backdrop={content.backdrop} />
+        </div>
 
-        <div className="flex flex-col items-center gap-5 sm:gap-6 lg:contents">
+        <div className="flex flex-col items-center gap-4 shrink-0 sm:gap-6 lg:contents">
           <HeroTitle id={TITLE_ID} lines={content.title} />
           <HeroCta label={content.cta.label} href={content.cta.href} />
         </div>

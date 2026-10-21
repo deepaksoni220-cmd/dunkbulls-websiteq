@@ -946,7 +946,7 @@ export const HeroScene = ({ src, label, still }: HeroSceneProps) => {
       worldPerPixel = (2 * distance * halfTan) / cssHeight;
       basePositionY = fullBleed
         ? riseUnits * scale * worldPerPixel
-        : -cssHeight * BOXED_DROP * worldPerPixel;
+        : cssHeight * 0.02 * worldPerPixel;
       const offsetUnits = still
         ? still.offsetX + (still.entrance?.shiftX ?? 0) * (1 - eased)
         : DETAILS_SHIFT_X * eased;
