@@ -39,9 +39,11 @@ export const Hero = ({ content }: HeroProps) => (
     <div className="max-lg:contents lg:absolute lg:inset-0">
       {/* First viewport screen on mobile: 3D model in center, title & CTA at bottom */}
       <div className="flex h-[calc(100dvh-3.625rem)] max-lg:h-[calc(100dvh-3.625rem)] w-full flex-col justify-between px-5 pt-4 pb-6 sm:pb-8 shrink-0 lg:contents">
-        {/* Edge markers: hidden on mobile per user request, visible on desktop frame */}
-        <div className="max-lg:hidden lg:contents">
-          <HeroMarker align="start" lines={content.markerStart.lines} />
+        {/* Edge markers: markerStart removed on mobile per user request; markerEnd kept visible */}
+        <div className="flex justify-end w-full shrink-0 lg:contents">
+          <div className="hidden lg:contents">
+            <HeroMarker align="start" lines={content.markerStart.lines} />
+          </div>
           <HeroMarker align="end" lines={content.markerEnd.lines} />
         </div>
 
