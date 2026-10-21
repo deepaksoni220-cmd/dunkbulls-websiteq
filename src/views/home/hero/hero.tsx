@@ -38,7 +38,7 @@ export const Hero = ({ content }: HeroProps) => (
   >
     <div className="max-lg:contents lg:absolute lg:inset-0">
       {/* First viewport screen on mobile: from markers down through 3D model and title to SHOP NOW button */}
-      <div className="flex min-h-[calc(100svh-3.625rem)] w-full flex-col justify-between px-5 pt-3 pb-6 sm:pb-8 lg:contents">
+      <div className="flex h-[calc(100dvh-3.625rem)] max-lg:h-[calc(100dvh-3.625rem)] w-full flex-col justify-between px-5 pt-3 pb-6 sm:pb-8 shrink-0 lg:contents">
         <div className="flex gap-4 shrink-0 lg:contents">
           <HeroMarker align="start" lines={content.markerStart.lines} />
           <HeroMarker align="end" lines={content.markerEnd.lines} />
