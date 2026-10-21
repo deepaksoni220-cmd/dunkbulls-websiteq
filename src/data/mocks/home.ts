@@ -42,7 +42,7 @@ export const homeHero: HeroContent = {
     lines: ["DESIGNED", "FOR THE UNKNOWN.", "READY FOR ANYTHING."],
   },
   title: [
-    "HEAVYWEIGHT 260 GSM COTTON.",
+    "SUPERIOR 260 GSM COTTON.",
     "OVERSIZED FIT. LIMITED QUANTITY.",
   ],
   cta: { label: "SHOP NOW", href: "/collections" },

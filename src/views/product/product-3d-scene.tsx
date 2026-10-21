@@ -118,6 +118,8 @@ export const Product3DScene = ({
         const upgradeMat = (source: MeshStandardMaterial) => {
           if (source.map) {
             source.map.colorSpace = SRGBColorSpace;
+            source.map.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+            source.map.needsUpdate = true;
           }
           return new MeshPhysicalMaterial({
             color: 0xffffff,

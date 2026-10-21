@@ -38,7 +38,7 @@ const BACKDROP_OPACITY = 0.2;
  * is framed to the box's height, so the box is the only lever that moves that
  * number without shrinking the type around it.
  */
-export const PRODUCT_BOX = "aspect-4/3 md:aspect-16/9";
+export const PRODUCT_BOX = "aspect-4/3 max-sm:aspect-square max-lg:max-h-[46svh] md:aspect-16/9 lg:aspect-auto lg:max-h-none";
 
 /**
  * The backdrop plate, and the space the product occupies (Figma 902:306 /

@@ -9,6 +9,7 @@ import {
   Color,
   DirectionalLight,
   DoubleSide,
+  LinearFilter,
   MathUtils,
   Mesh,
   MeshPhysicalMaterial,
@@ -503,9 +504,9 @@ const readTier = (): SceneTier => {
  * visibly below 1.
  */
 const RATIO_STEPS: Record<SceneTier, readonly number[]> = {
-  mobile: [1, 0.85, 0.75],
-  tablet: [1.25, 1, 0.85],
-  desktop: [1.5, 1.25, 1],
+  mobile: [2, 1.5, 1],
+  tablet: [2, 1.5, 1],
+  desktop: [2, 1.5, 1],
 };
 
 /**
@@ -739,8 +740,8 @@ export const HeroScene = ({ src, label, still }: HeroSceneProps) => {
 
     const renderer = new WebGLRenderer({
       alpha: true,
-      antialias: !coarse,
-      powerPreference: coarse ? "default" : "high-performance",
+      antialias: true,
+      powerPreference: "high-performance",
       stencil: false,
     });
 
@@ -824,9 +825,10 @@ export const HeroScene = ({ src, label, still }: HeroSceneProps) => {
       // no reason a reader could see.
       fullBleed = framed;
 
+      const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
       const ratio = Math.min(
         ratios[Math.min(ratioStep, ratios.length - 1)],
-        window.devicePixelRatio || 1,
+        Math.max(dpr, 2),
       );
       renderer.setPixelRatio(ratio);
       renderer.setSize(cssWidth, cssHeight, false);
@@ -1091,7 +1093,9 @@ export const HeroScene = ({ src, label, still }: HeroSceneProps) => {
       fpsFrames += 1;
       if (fpsAccum >= 500) {
         const fps = (fpsFrames * 1000) / fpsAccum;
-        if (fps < FPS_FLOOR) {
+        const targetFps = FRAME_BUDGET[tier] > 0 ? 1000 / FRAME_BUDGET[tier] : 60;
+        const floor = targetFps * 0.7;
+        if (fps < floor) {
           fpsScale = Math.max(0.3, fpsScale - 0.15);
           if (fpsScale <= 0.55 && ratioStep < ratios.length - 1) {
             ratioStep += 1;
@@ -1279,8 +1283,16 @@ export const HeroScene = ({ src, label, still }: HeroSceneProps) => {
         if (!(child instanceof Mesh)) return;
         const upgradeMaterial = (source: MeshStandardMaterial | null | undefined) => {
           if (!source) return source;
+          const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
           if (source.map) {
             source.map.colorSpace = SRGBColorSpace;
+            source.map.anisotropy = Math.min(maxAnisotropy, 16);
+            source.map.minFilter = LinearFilter;
+            source.map.generateMipmaps = false;
+            source.map.needsUpdate = true;
+          }
+          if (source && "normalMap" in source && source.normalMap) {
+            (source.normalMap as Texture).anisotropy = Math.min(maxAnisotropy, 8);
           }
           return new MeshPhysicalMaterial({
             color: new Color(0xffffff),

@@ -3,9 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { useCartStore } from "@/lib/cart/cart-store";
 import { ScrambleText } from "@/components/ui/scramble-text";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 import type { HeroImage, HeroLink, HeroNavItem } from "./hero.types";
 
@@ -31,15 +33,9 @@ const TRANSITION = "transition duration-[var(--duration-fast)] ease-entrance";
  * a hover submenu that a finger cannot reach. So below `lg` the row collapses
  * to the logo and this control, and everything it carried moves into a panel.
  *
- * **The panel draws its own header rather than sitting under the page's.**
- * Measuring the sticky band and offsetting by it would tie this component to
- * another one's padding; covering the screen and repeating the logo in the same
- * box cannot drift. The burger becomes the close control in place, so the thing
- * that opened the panel is the thing that shuts it.
- *
- * The submenu is listed open. It is a disclosure on desktop because hover has
- * somewhere to put it; here there is room on the screen, and a second tap to
- * reach four links is a cost with nothing bought.
+ * The panel is portaled directly into `document.body` so parent transforms
+ * (such as header entrance springs) and paint containment do not clip or trap
+ * its fixed overlay to the header strip.
  */
 export const HeroMenu = ({ logo, nav, cart, logoClassName }: HeroMenuProps) => {
   const [open, setOpen] = useState(false);
@@ -75,31 +71,14 @@ export const HeroMenu = ({ logo, nav, cart, logoClassName }: HeroMenuProps) => {
 
   const bar = `block h-px w-full bg-hero-content ${TRANSITION}`;
 
-  return (
-    <>
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-label={open ? "Close menu" : "Open menu"}
-        onClick={() => setOpen((value) => !value)}
-        className={`relative z-[70] flex h-6 w-7 shrink-0 cursor-pointer flex-col justify-between py-1 tap-area [--tap-x:0.75rem] [--tap-y:0.75rem] ${FOCUS_RING}`}
-      >
-        <span
-          className={`${bar} ${open ? "translate-y-[7px] rotate-45" : ""}`}
-        />
-        <span className={`${bar} ${open ? "opacity-0" : ""}`} />
-        <span
-          className={`${bar} ${open ? "-translate-y-[7px] -rotate-45" : ""}`}
-        />
-      </button>
-
-      <div
-        // Held in the tree so it can fade, and `invisible` when shut so nothing
-        // inside it is clickable or tab-reachable.
-        className={`hero-lattice-panel fixed inset-0 z-[60] flex flex-col px-5 pt-5 pb-10 ${TRANSITION} ${
-          open ? "visible opacity-100" : "invisible opacity-0"
-        }`}
-      >
+  const panel = (
+    <div
+      aria-hidden={!open}
+      className={`hero-lattice-panel fixed inset-0 z-[100] flex flex-col font-mono text-hero-content ${TRANSITION} ${
+        open ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
+      }`}
+    >
+      <div className="flex items-center justify-between border-b border-hero-rule px-4 py-3">
         <Link
           href="/"
           onClick={() => setOpen(false)}
@@ -111,16 +90,34 @@ export const HeroMenu = ({ logo, nav, cart, logoClassName }: HeroMenuProps) => {
             alt={logo.alt}
             width={logo.width}
             height={logo.height}
-            className="h-full w-full object-contain"
+            className="h-full w-full object-contain object-left"
           />
         </Link>
 
-        <nav aria-label="Primary" className="mt-10 flex-1 overflow-y-auto">
+        <div className="flex items-center gap-3">
+          <ThemeToggle variant="icon" />
+
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setOpen(false)}
+            tabIndex={open ? undefined : -1}
+            className={`flex h-6 w-7 shrink-0 cursor-pointer flex-col justify-between py-1 tap-area [--tap-x:0.75rem] [--tap-y:0.75rem] ${FOCUS_RING}`}
+          >
+            <span className={`${bar} translate-y-[7px] rotate-45`} />
+            <span className={`${bar} opacity-0`} />
+            <span className={`${bar} -translate-y-[7px] -rotate-45`} />
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col overflow-y-auto px-5 py-6">
+        <nav aria-label="Primary" className="flex-1">
           <ul className="flex flex-col">
             {nav.map((item) => (
               <li
                 key={item.label}
-                className="border-t border-hero-rule py-5 last:border-b"
+                className="border-t border-hero-rule py-5 first:border-t-0 last:border-b"
               >
                 <Link
                   href={item.href}
@@ -158,13 +155,35 @@ export const HeroMenu = ({ logo, nav, cart, logoClassName }: HeroMenuProps) => {
           href={cart.href}
           onClick={() => setOpen(false)}
           tabIndex={open ? undefined : -1}
-          className={`mt-10 flex h-13 items-center justify-center border border-hero-content text-hero-body leading-hero-display text-hero-content ${FOCUS_RING}`}
+          className={`mt-8 flex h-13 shrink-0 items-center justify-center border border-hero-content text-hero-body leading-hero-display text-hero-content ${FOCUS_RING}`}
         >
           <ScrambleText revealDelay={open ? 240 : undefined}>
             {cartLabel}
           </ScrambleText>
         </Link>
       </div>
+    </div>
+  );
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-label={open ? "Close menu" : "Open menu"}
+        onClick={() => setOpen((value) => !value)}
+        className={`relative z-[70] flex h-6 w-7 shrink-0 cursor-pointer flex-col justify-between py-1 tap-area [--tap-x:0.75rem] [--tap-y:0.75rem] ${FOCUS_RING}`}
+      >
+        <span
+          className={`${bar} ${open ? "translate-y-[7px] rotate-45" : ""}`}
+        />
+        <span className={`${bar} ${open ? "opacity-0" : ""}`} />
+        <span
+          className={`${bar} ${open ? "-translate-y-[7px] -rotate-45" : ""}`}
+        />
+      </button>
+
+      {mounted ? createPortal(panel, document.body) : null}
     </>
   );
 };

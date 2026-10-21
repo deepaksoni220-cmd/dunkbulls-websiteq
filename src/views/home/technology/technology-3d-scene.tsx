@@ -191,6 +191,8 @@ export const Technology3DScene = ({ className = "" }: Technology3DSceneProps) =>
             const prevMat = child.material as MeshStandardMaterial;
             if (prevMat?.map) {
               prevMat.map.colorSpace = SRGBColorSpace;
+              prevMat.map.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+              prevMat.map.needsUpdate = true;
             }
 
             const newMat = new MeshPhysicalMaterial({
