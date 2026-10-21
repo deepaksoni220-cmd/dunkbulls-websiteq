@@ -85,11 +85,25 @@ export const ProductStage = ({ subject, children }: ProductStageProps) => {
     if (!root || !(box instanceof HTMLElement)) return;
 
     const sync = () => {
-      const offset =
-        box.getBoundingClientRect().top - root.getBoundingClientRect().top;
+      const boxRect = box.getBoundingClientRect();
+      const rootRect = root.getBoundingClientRect();
+      const offsetTop = boxRect.top - rootRect.top;
+      const offsetLeft = boxRect.left - rootRect.left;
       root.style.setProperty(
         "--hero-stage-top",
-        `${Math.max(0, Math.round(offset))}px`,
+        `${Math.max(0, Math.round(offsetTop))}px`,
+      );
+      root.style.setProperty(
+        "--hero-stage-left",
+        `${Math.max(0, Math.round(offsetLeft))}px`,
+      );
+      root.style.setProperty(
+        "--hero-stage-width",
+        `${Math.round(boxRect.width)}px`,
+      );
+      root.style.setProperty(
+        "--hero-stage-height",
+        `${Math.round(boxRect.height)}px`,
       );
     };
     sync();
@@ -97,25 +111,20 @@ export const ProductStage = ({ subject, children }: ProductStageProps) => {
     const observer = new ResizeObserver(sync);
     observer.observe(root);
     observer.observe(box);
-    return () => observer.disconnect();
+    window.addEventListener("resize", sync);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", sync);
+    };
   }, []);
 
   return (
     <div data-product-region ref={region} className="relative">
       <div
         data-pointer-frame
-        // **The canvas is one frame tall, and it sticks half the slack down.**
-        // Viewport-tall, it overhung the details screen — which is cut to the
-        // frame's own 800 units — by the difference, and the product spilled 89px
-        // up into the seam between the first and second screens at 1280×800. At
-        // the frame's height it can do that nowhere: sticky clamps its bottom to
-        // the region's, so on the details screen the canvas *is* the section.
-        //
-        // The `top` offset is what keeps the hero right. A sticky box pinned to 0
-        // would sit against the top of a viewport that is taller than it; half the
-        // leftover puts it back in the middle, where the hero's product belongs.
-        // At 1440×800 the leftover is zero and this resolves to `top: 0`.
-        className={`pointer-events-none absolute inset-x-5 top-[var(--hero-stage-top,0px)] z-10 overflow-hidden ${PRODUCT_BOX} lg:sticky lg:inset-x-0 lg:top-[calc((100lvh-50rem)/2)] lg:aspect-auto lg:h-200 lg:w-auto lg:hero-stage-mask`}
+        // The canvas matches [data-hero-stage] exactly on mobile/tablet for perfect alignment,
+        // and sticks half the slack down on desktop frames (>= lg).
+        className="pointer-events-none absolute left-[var(--hero-stage-left,0px)] top-[var(--hero-stage-top,0px)] h-[var(--hero-stage-height,100%)] w-[var(--hero-stage-width,100%)] z-10 overflow-hidden lg:sticky lg:inset-x-0 lg:top-[calc((100lvh-50rem)/2)] lg:aspect-auto lg:h-200 lg:w-auto lg:hero-stage-mask"
       >
         <HeroScene src={subject.src} label={subject.label} />
       </div>
