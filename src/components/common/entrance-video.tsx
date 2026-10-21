@@ -175,37 +175,6 @@ export const EntranceVideo = () => {
       {/* Subtle vignette / overlay */}
       <div className="pointer-events-none absolute inset-0 bg-black/25" />
 
-      {/* Central Unmute Prompt (visible only when browser policy forced muted playback) */}
-      {audioBlockedByBrowser && !done && (
-        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center p-4">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              unmute();
-            }}
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              unmute();
-            }}
-            aria-label="Tap anywhere to hear sound"
-            className="pointer-events-auto group flex items-center gap-3.5 border border-white/60 bg-black/85 px-6 py-3.5 text-white shadow-2xl backdrop-blur-md transition duration-[var(--duration-fast)] ease-entrance hover:border-white hover:bg-white hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white cursor-pointer active:scale-95 animate-pulse"
-          >
-            <span className="text-xl select-none" aria-hidden="true">
-              🔊
-            </span>
-            <div className="flex flex-col text-left">
-              <span className="font-mono text-hero-caption leading-hero-display tracking-hero-caption font-bold uppercase">
-                TAP ANYWHERE FOR SOUND
-              </span>
-              <span className="font-mono text-hero-caption leading-hero-caption text-white/70 group-hover:text-black/70">
-                AUDIO IS ON • CLICK TO UNLOCK
-              </span>
-            </div>
-          </button>
-        </div>
-      )}
-
       {/* Top Header Controls */}
       <div className="relative z-10 flex items-center justify-between p-5 sm:p-8">
         <span className="text-hero-caption leading-hero-display tracking-hero-caption text-white/70 uppercase">
@@ -219,11 +188,9 @@ export const EntranceVideo = () => {
           aria-label={audioEnabled ? "Mute audio" : "Unmute audio"}
           className="flex items-center gap-2 border border-white/30 bg-black/50 px-3 py-1.5 text-hero-caption leading-hero-display text-white backdrop-blur-md transition duration-[var(--duration-fast)] ease-entrance hover:border-white hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white tap-area cursor-pointer"
         >
-          <span aria-hidden="true">{audioEnabled && !audioBlockedByBrowser ? "🔊" : audioEnabled ? "🔈" : "🔇"}</span>
+          <span aria-hidden="true">{audioEnabled ? "🔊" : "🔇"}</span>
           <span>AUDIO:</span>
-          <span className="font-bold">
-            {audioEnabled && !audioBlockedByBrowser ? "ON" : audioEnabled ? "ON (TAP SCREEN)" : "MUTED"}
-          </span>
+          <span className="font-bold">{audioEnabled ? "ON" : "MUTED"}</span>
         </button>
       </div>
 
