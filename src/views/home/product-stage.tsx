@@ -123,8 +123,9 @@ export const ProductStage = ({ subject, children }: ProductStageProps) => {
       <div
         data-pointer-frame
         // The canvas matches [data-hero-stage] exactly on mobile/tablet for perfect alignment,
+        // uses overflow-visible on mobile so the 3D garment is never clipped,
         // and sticks half the slack down on desktop frames (>= lg).
-        className="pointer-events-none absolute left-[var(--hero-stage-left,0px)] top-[var(--hero-stage-top,0px)] h-[var(--hero-stage-height,100%)] w-[var(--hero-stage-width,100%)] z-10 overflow-hidden lg:sticky lg:inset-x-0 lg:top-[calc((100lvh-50rem)/2)] lg:aspect-auto lg:h-200 lg:w-auto lg:hero-stage-mask"
+        className="pointer-events-none absolute left-[var(--hero-stage-left,0px)] top-[var(--hero-stage-top,0px)] h-[var(--hero-stage-height,100%)] w-[var(--hero-stage-width,100%)] z-10 max-lg:overflow-visible lg:overflow-hidden lg:sticky lg:inset-x-0 lg:top-[calc((100lvh-50rem)/2)] lg:aspect-auto lg:h-200 lg:w-auto lg:hero-stage-mask"
       >
         <HeroScene src={subject.src} label={subject.label} />
       </div>

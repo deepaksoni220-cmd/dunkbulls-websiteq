@@ -38,7 +38,7 @@ const BACKDROP_OPACITY = 0.2;
  * is framed to the box's height, so the box is the only lever that moves that
  * number without shrinking the type around it.
  */
-export const PRODUCT_BOX = "aspect-square max-lg:h-[42dvh] max-lg:max-h-[360px] md:aspect-16/9 lg:aspect-auto lg:max-h-none";
+export const PRODUCT_BOX = "aspect-square max-lg:h-[46dvh] max-lg:max-h-[400px] md:aspect-16/9 lg:aspect-auto lg:max-h-none";
 
 /**
  * The backdrop plate, and the space the product occupies (Figma 902:306 /
@@ -71,7 +71,7 @@ export const HeroStage = ({ backdrop }: HeroStageProps) => (
     // — the markers — would slide out from under the product unless the canvas
     // is told where the box actually ended up. See `product-stage.tsx`.
     data-hero-stage
-    className={`pointer-events-none relative z-0 w-full lg:absolute lg:inset-0 lg:aspect-auto lg:w-auto ${PRODUCT_BOX}`}
+    className={`pointer-events-none relative z-0 w-full max-lg:overflow-visible lg:overflow-hidden lg:absolute lg:inset-0 lg:aspect-auto lg:w-auto ${PRODUCT_BOX}`}
   >
     <HeroWordmark plate={backdrop} opacity={BACKDROP_OPACITY} />
   </div>
