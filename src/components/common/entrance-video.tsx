@@ -12,7 +12,7 @@ export const EntranceVideo = () => {
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(false);
   const [done, setDone] = useState(false);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -66,24 +66,43 @@ export const EntranceVideo = () => {
     };
   }, [active, done, dismiss]);
 
+  // Attempt unmuted audio autoplay by default; fallback to muted if browser restricts it
   useEffect(() => {
     if (active && videoRef.current) {
-      const playPromise = videoRef.current.play();
+      const video = videoRef.current;
+      video.muted = false;
+      const playPromise = video.play();
       if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Autoplay was restricted by the browser
-        });
+        playPromise
+          .then(() => {
+            setMuted(false);
+          })
+          .catch(() => {
+            // Browser policy blocked unmuted autoplay; play muted until user taps
+            video.muted = true;
+            setMuted(true);
+            video.play().catch(() => {});
+          });
       }
     }
   }, [active]);
 
   if (!mounted || !active) return null;
 
-  const toggleSound = () => {
+  const toggleSound = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (!videoRef.current) return;
     const nextMuted = !muted;
     videoRef.current.muted = nextMuted;
     setMuted(nextMuted);
+  };
+
+  const handleScreenClick = () => {
+    // Unmute audio immediately on user tap/click anywhere
+    if (videoRef.current && muted) {
+      videoRef.current.muted = false;
+      setMuted(false);
+    }
   };
 
   const onTimeUpdate = () => {
@@ -99,6 +118,7 @@ export const EntranceVideo = () => {
       aria-label="DUNKBULL Entrance Experience"
       role="dialog"
       aria-modal="true"
+      onClick={handleScreenClick}
       className={`fixed inset-0 z-[120] flex flex-col justify-between bg-black font-mono transition-opacity duration-[var(--duration-normal)] ease-entrance ${
         done ? "pointer-events-none opacity-0" : "opacity-100"
       }`}
@@ -144,7 +164,10 @@ export const EntranceVideo = () => {
 
           <button
             type="button"
-            onClick={dismiss}
+            onClick={(e) => {
+              e.stopPropagation();
+              dismiss();
+            }}
             aria-label="Enter store"
             className="group ml-auto flex items-center gap-3 border border-white/40 bg-black/60 px-5 py-3 text-hero-body leading-hero-display text-white backdrop-blur-md transition duration-[var(--duration-fast)] ease-entrance hover:border-white hover:bg-white hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white tap-area"
           >
