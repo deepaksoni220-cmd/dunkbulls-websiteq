@@ -13,7 +13,9 @@ export const EntranceVideo = () => {
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(false);
   const [done, setDone] = useState(false);
-  const [muted, setMuted] = useState(false);
+  // Sound is ON by default
+  const [audioEnabled, setAudioEnabled] = useState(true);
+  const [audioBlockedByBrowser, setAudioBlockedByBrowser] = useState(false);
   const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -53,14 +55,16 @@ export const EntranceVideo = () => {
     video.muted = false;
     video.volume = 1.0;
     video.play().catch(() => {});
-    setMuted(false);
+    setAudioEnabled(true);
+    setAudioBlockedByBrowser(false);
   }, []);
 
   const mute = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
     video.muted = true;
-    setMuted(true);
+    setAudioEnabled(false);
+    setAudioBlockedByBrowser(false);
   }, []);
 
   const toggleSound = useCallback(
@@ -68,13 +72,13 @@ export const EntranceVideo = () => {
       e?.stopPropagation();
       const video = videoRef.current;
       if (!video) return;
-      if (video.muted) {
+      if (!audioEnabled || video.muted) {
         unmute();
       } else {
         mute();
       }
     },
-    [unmute, mute]
+    [audioEnabled, unmute, mute]
   );
 
   useEffect(() => {
@@ -85,8 +89,8 @@ export const EntranceVideo = () => {
         dismiss();
       } else if (e.key === "m" || e.key === "M") {
         toggleSound();
-      } else if (muted) {
-        // Any keypress unlocks audio if currently muted
+      } else if (audioBlockedByBrowser) {
+        // Any keypress unlocks audio if blocked by browser
         unmute();
       }
     };
@@ -100,28 +104,30 @@ export const EntranceVideo = () => {
       window.removeEventListener("keydown", onKeyDown);
       root.style.overflow = prevOverflow;
     };
-  }, [active, done, dismiss, muted, toggleSound, unmute]);
+  }, [active, done, dismiss, audioBlockedByBrowser, toggleSound, unmute]);
 
-  // Attempt unmuted audio autoplay by default; fallback to muted if browser restricts it
+  // Attempt unmuted audio autoplay by default
   useEffect(() => {
     if (!active) return;
     const video = videoRef.current;
     if (!video) return;
 
+    // Audio ON by default
     video.muted = false;
     video.volume = 1.0;
     const playPromise = video.play();
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
-          // Unmuted playback succeeded
-          setMuted(false);
+          // Browser allowed unmuted autoplay!
+          setAudioEnabled(true);
+          setAudioBlockedByBrowser(false);
         })
         .catch(() => {
-          // Browser autoplay policy blocked unmuted autoplay;
-          // Play muted and prompt user so they can unmute with a single tap
+          // Browser autoplay policy restricted unmuted playback until user interacts.
+          // Play muted temporarily and prompt user to tap once to unlock the audio.
           video.muted = true;
-          setMuted(true);
+          setAudioBlockedByBrowser(true);
           video.play().catch(() => {});
         });
     }
@@ -130,7 +136,7 @@ export const EntranceVideo = () => {
   if (!mounted || !active) return null;
 
   const handleBackdropClick = () => {
-    if (muted) {
+    if (audioBlockedByBrowser || !audioEnabled) {
       unmute();
     }
   };
@@ -151,7 +157,7 @@ export const EntranceVideo = () => {
       onClick={handleBackdropClick}
       onPointerDown={handleBackdropClick}
       className={`fixed inset-0 z-[120] flex flex-col justify-between bg-black font-mono transition-opacity duration-[var(--duration-normal)] ease-entrance select-none ${
-        muted ? "cursor-pointer" : ""
+        audioBlockedByBrowser ? "cursor-pointer" : ""
       } ${done ? "pointer-events-none opacity-0" : "opacity-100"}`}
     >
       {/* Background Video */}
@@ -160,7 +166,7 @@ export const EntranceVideo = () => {
         src="/assets/video/entrance.mp4"
         playsInline
         autoPlay
-        muted={muted}
+        muted={!audioEnabled || audioBlockedByBrowser}
         onTimeUpdate={onTimeUpdate}
         onEnded={dismiss}
         className="absolute inset-0 h-full w-full object-cover"
@@ -170,7 +176,7 @@ export const EntranceVideo = () => {
       <div className="pointer-events-none absolute inset-0 bg-black/25" />
 
       {/* Central Unmute Prompt (visible only when browser policy forced muted playback) */}
-      {muted && !done && (
+      {audioBlockedByBrowser && !done && (
         <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center p-4">
           <button
             type="button"
@@ -182,10 +188,10 @@ export const EntranceVideo = () => {
               e.stopPropagation();
               unmute();
             }}
-            aria-label="Tap to enable sound"
+            aria-label="Tap anywhere to hear sound"
             className="pointer-events-auto group flex items-center gap-3.5 border border-white/60 bg-black/85 px-6 py-3.5 text-white shadow-2xl backdrop-blur-md transition duration-[var(--duration-fast)] ease-entrance hover:border-white hover:bg-white hover:text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white cursor-pointer active:scale-95 animate-pulse"
           >
-            <span className="text-lg select-none" aria-hidden="true">
+            <span className="text-xl select-none" aria-hidden="true">
               🔊
             </span>
             <div className="flex flex-col text-left">
@@ -193,7 +199,7 @@ export const EntranceVideo = () => {
                 TAP ANYWHERE FOR SOUND
               </span>
               <span className="font-mono text-hero-caption leading-hero-caption text-white/70 group-hover:text-black/70">
-                CLICK OR TOUCH SCREEN TO UNMUTE
+                AUDIO IS ON • CLICK TO UNLOCK
               </span>
             </div>
           </button>
@@ -210,12 +216,14 @@ export const EntranceVideo = () => {
           type="button"
           onClick={toggleSound}
           onPointerDown={(e) => e.stopPropagation()}
-          aria-label={muted ? "Unmute audio" : "Mute audio"}
+          aria-label={audioEnabled ? "Mute audio" : "Unmute audio"}
           className="flex items-center gap-2 border border-white/30 bg-black/50 px-3 py-1.5 text-hero-caption leading-hero-display text-white backdrop-blur-md transition duration-[var(--duration-fast)] ease-entrance hover:border-white hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white tap-area cursor-pointer"
         >
-          <span aria-hidden="true">{muted ? "🔇" : "🔊"}</span>
+          <span aria-hidden="true">{audioEnabled && !audioBlockedByBrowser ? "🔊" : audioEnabled ? "🔈" : "🔇"}</span>
           <span>AUDIO:</span>
-          <span className="font-bold">{muted ? "MUTED" : "ON"}</span>
+          <span className="font-bold">
+            {audioEnabled && !audioBlockedByBrowser ? "ON" : audioEnabled ? "ON (TAP SCREEN)" : "MUTED"}
+          </span>
         </button>
       </div>
 
