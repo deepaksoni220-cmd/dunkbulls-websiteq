@@ -8,6 +8,7 @@ import {
 } from "@/utils/seo/generate-page-metadata";
 import { getSiteStructuredData } from "@/utils/seo/structured-data";
 
+import { EntranceVideo } from "@/components/common/entrance-video";
 import { LazyCookie } from "@/components/common/Cookie";
 import { Preloader } from "@/components/common/preloader";
 import { ReducedMotion } from "@/components/common/reduced-motion";
@@ -79,6 +80,7 @@ export default function RootLayout({
               every width (globals.css), so a JS pass would only add a flash of
               unscaled layout on load. See decisions-log ADR-0024. */}
           <ReducedMotion />
+          <EntranceVideo />
           <Preloader />
           <LazyCookie />
           {children}
